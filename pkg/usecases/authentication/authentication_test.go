@@ -62,7 +62,7 @@ func TestAuthentication_Do(t *testing.T) {
 			ClientFactory: mockClientFactory,
 			Logger:        testingLogger.New(t),
 		}
-		got, err := u.Do(ctx, in)
+		got, _, err := u.Do(ctx, in)
 		if err != nil {
 			t.Errorf("Do returned error: %+v", err)
 		}
@@ -122,7 +122,7 @@ func TestAuthentication_Do(t *testing.T) {
 				Logger: testingLogger.New(t),
 			},
 		}
-		got, err := u.Do(ctx, in)
+		got, _, err := u.Do(ctx, in)
 		if err != nil {
 			t.Errorf("Do returned error: %+v", err)
 		}
@@ -168,7 +168,7 @@ func TestAuthentication_Do(t *testing.T) {
 				Logger: testingLogger.New(t),
 			},
 		}
-		got, err := u.Do(ctx, in)
+		got, _, err := u.Do(ctx, in)
 		if err != nil {
 			t.Errorf("Do returned error: %+v", err)
 		}

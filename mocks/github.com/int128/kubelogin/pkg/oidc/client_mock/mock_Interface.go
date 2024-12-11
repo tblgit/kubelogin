@@ -145,6 +145,64 @@ func (_c *MockInterface_ExchangeDeviceCode_Call) RunAndReturn(run func(context.C
 	return _c
 }
 
+// GetAuthCode provides a mock function with given fields: ctx, in, localServerReadyChan
+func (_m *MockInterface) GetAuthCode(ctx context.Context, in client.GetTokenByAuthCodeInput, localServerReadyChan chan<- string) (string, error) {
+	ret := _m.Called(ctx, in, localServerReadyChan)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetAuthCode")
+	}
+
+	var r0 string
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, client.GetTokenByAuthCodeInput, chan<- string) (string, error)); ok {
+		return rf(ctx, in, localServerReadyChan)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, client.GetTokenByAuthCodeInput, chan<- string) string); ok {
+		r0 = rf(ctx, in, localServerReadyChan)
+	} else {
+		r0 = ret.Get(0).(string)
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, client.GetTokenByAuthCodeInput, chan<- string) error); ok {
+		r1 = rf(ctx, in, localServerReadyChan)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockInterface_GetAuthCode_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetAuthCode'
+type MockInterface_GetAuthCode_Call struct {
+	*mock.Call
+}
+
+// GetAuthCode is a helper method to define mock.On call
+//   - ctx context.Context
+//   - in client.GetTokenByAuthCodeInput
+//   - localServerReadyChan chan<- string
+func (_e *MockInterface_Expecter) GetAuthCode(ctx interface{}, in interface{}, localServerReadyChan interface{}) *MockInterface_GetAuthCode_Call {
+	return &MockInterface_GetAuthCode_Call{Call: _e.mock.On("GetAuthCode", ctx, in, localServerReadyChan)}
+}
+
+func (_c *MockInterface_GetAuthCode_Call) Run(run func(ctx context.Context, in client.GetTokenByAuthCodeInput, localServerReadyChan chan<- string)) *MockInterface_GetAuthCode_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(client.GetTokenByAuthCodeInput), args[2].(chan<- string))
+	})
+	return _c
+}
+
+func (_c *MockInterface_GetAuthCode_Call) Return(_a0 string, _a1 error) *MockInterface_GetAuthCode_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockInterface_GetAuthCode_Call) RunAndReturn(run func(context.Context, client.GetTokenByAuthCodeInput, chan<- string) (string, error)) *MockInterface_GetAuthCode_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // GetAuthCodeURL provides a mock function with given fields: in
 func (_m *MockInterface) GetAuthCodeURL(in client.AuthCodeURLInput) string {
 	ret := _m.Called(in)
@@ -249,9 +307,6 @@ func (_c *MockInterface_GetDeviceAuthorization_Call) RunAndReturn(run func(conte
 	return _c
 }
 
-func (_m *MockInterface) GetAuthCode(ctx context.Context, in client.GetTokenByAuthCodeInput, localServerReadyChan chan<- string) (string, error) {
-	return "", nil
-}
 // GetTokenByAuthCode provides a mock function with given fields: ctx, in, localServerReadyChan
 func (_m *MockInterface) GetTokenByAuthCode(ctx context.Context, in client.GetTokenByAuthCodeInput, localServerReadyChan chan<- string) (*oidc.TokenSet, error) {
 	ret := _m.Called(ctx, in, localServerReadyChan)

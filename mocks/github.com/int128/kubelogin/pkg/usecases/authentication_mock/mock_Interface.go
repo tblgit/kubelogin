@@ -24,7 +24,7 @@ func (_m *MockInterface) EXPECT() *MockInterface_Expecter {
 }
 
 // Do provides a mock function with given fields: ctx, in
-func (_m *MockInterface) Do(ctx context.Context, in authentication.Input) (*authentication.Output, error) {
+func (_m *MockInterface) Do(ctx context.Context, in authentication.Input) (*authentication.Output, string, error) {
 	ret := _m.Called(ctx, in)
 
 	if len(ret) == 0 {
@@ -32,8 +32,9 @@ func (_m *MockInterface) Do(ctx context.Context, in authentication.Input) (*auth
 	}
 
 	var r0 *authentication.Output
-	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, authentication.Input) (*authentication.Output, error)); ok {
+	var r1 string
+	var r2 error
+	if rf, ok := ret.Get(0).(func(context.Context, authentication.Input) (*authentication.Output, string, error)); ok {
 		return rf(ctx, in)
 	}
 	if rf, ok := ret.Get(0).(func(context.Context, authentication.Input) *authentication.Output); ok {
@@ -44,13 +45,19 @@ func (_m *MockInterface) Do(ctx context.Context, in authentication.Input) (*auth
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, authentication.Input) error); ok {
+	if rf, ok := ret.Get(1).(func(context.Context, authentication.Input) string); ok {
 		r1 = rf(ctx, in)
 	} else {
-		r1 = ret.Error(1)
+		r1 = ret.Get(1).(string)
 	}
 
-	return r0, r1
+	if rf, ok := ret.Get(2).(func(context.Context, authentication.Input) error); ok {
+		r2 = rf(ctx, in)
+	} else {
+		r2 = ret.Error(2)
+	}
+
+	return r0, r1, r2
 }
 
 // MockInterface_Do_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Do'
@@ -72,12 +79,12 @@ func (_c *MockInterface_Do_Call) Run(run func(ctx context.Context, in authentica
 	return _c
 }
 
-func (_c *MockInterface_Do_Call) Return(_a0 *authentication.Output, _a1 error) *MockInterface_Do_Call {
-	_c.Call.Return(_a0, _a1)
+func (_c *MockInterface_Do_Call) Return(_a0 *authentication.Output, _a1 string, _a2 error) *MockInterface_Do_Call {
+	_c.Call.Return(_a0, _a1, _a2)
 	return _c
 }
 
-func (_c *MockInterface_Do_Call) RunAndReturn(run func(context.Context, authentication.Input) (*authentication.Output, error)) *MockInterface_Do_Call {
+func (_c *MockInterface_Do_Call) RunAndReturn(run func(context.Context, authentication.Input) (*authentication.Output, string, error)) *MockInterface_Do_Call {
 	_c.Call.Return(run)
 	return _c
 }

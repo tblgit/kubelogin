@@ -82,7 +82,7 @@ type Stage2Input struct {
 
 func (u *Setup) DoStage2(ctx context.Context, in Stage2Input) error {
 	u.Logger.Printf("authentication in progress...")
-	out, err := u.Authentication.Do(ctx, authentication.Input{
+	out, _, err := u.Authentication.Do(ctx, authentication.Input{
 		Provider: oidc.Provider{
 			IssuerURL:    in.IssuerURL,
 			ClientID:     in.ClientID,

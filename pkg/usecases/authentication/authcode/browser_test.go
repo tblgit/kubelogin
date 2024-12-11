@@ -64,7 +64,7 @@ func TestBrowser_Do(t *testing.T) {
 		u := Browser{
 			Logger: logger.New(t),
 		}
-		got, err := u.Do(ctx, o, mockClient)
+		got, _, err := u.Do(ctx, o, mockClient, false)
 		if err != nil {
 			t.Errorf("Do returned error: %+v", err)
 		}
@@ -105,7 +105,7 @@ func TestBrowser_Do(t *testing.T) {
 			Logger:  logger.New(t),
 			Browser: mockBrowser,
 		}
-		got, err := u.Do(ctx, o, mockClient)
+		got, _, err := u.Do(ctx, o, mockClient, false)
 		if err != nil {
 			t.Errorf("Do returned error: %+v", err)
 		}
@@ -147,7 +147,7 @@ func TestBrowser_Do(t *testing.T) {
 			Logger:  logger.New(t),
 			Browser: mockBrowser,
 		}
-		got, err := u.Do(ctx, o, mockClient)
+		got, _, err := u.Do(ctx, o, mockClient, false)
 		if err != nil {
 			t.Errorf("Do returned error: %+v", err)
 		}

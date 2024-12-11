@@ -116,7 +116,7 @@ func (u *GetToken) Do(ctx context.Context, in Input) error {
 		TLSClientConfig: in.TLSClientConfig,
 		ForceRefresh:    in.ForceRefresh,
 	}
-	authenticationOutput, err := u.Authentication.Do(ctx, authenticationInput)
+	authenticationOutput, _, err := u.Authentication.Do(ctx, authenticationInput)
 	if err != nil {
 		return fmt.Errorf("authentication error: %w", err)
 	}

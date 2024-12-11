@@ -31,19 +31,19 @@ type Browser struct {
 	Logger  logger.Interface
 }
 
-func (u *Browser) Do(ctx context.Context, o *BrowserOption, oidcClient client.Interface) (*oidc.TokenSet, error) {
+func (u *Browser) Do(ctx context.Context, o *BrowserOption, oidcClient client.Interface, authcodeOnly bool) (*oidc.TokenSet, string, error) {
 	u.Logger.V(1).Infof("starting the authentication code flow using the browser")
 	state, err := oidc.NewState()
 	if err != nil {
-		return nil, fmt.Errorf("could not generate a state: %w", err)
+		return nil, "", fmt.Errorf("could not generate a state: %w", err)
 	}
 	nonce, err := oidc.NewNonce()
 	if err != nil {
-		return nil, fmt.Errorf("could not generate a nonce: %w", err)
+		return nil, "", fmt.Errorf("could not generate a nonce: %w", err)
 	}
 	p, err := pkce.New(oidcClient.SupportedPKCEMethods())
 	if err != nil {
-		return nil, fmt.Errorf("could not generate PKCE parameters: %w", err)
+		return nil, "", fmt.Errorf("could not generate PKCE parameters: %w", err)
 	}
 	successHTML := BrowserSuccessHTML
 	if o.OpenURLAfterAuthentication != "" {
@@ -64,6 +64,7 @@ func (u *Browser) Do(ctx context.Context, o *BrowserOption, oidcClient client.In
 	ctx, cancel := context.WithTimeout(ctx, o.AuthenticationTimeout)
 	defer cancel()
 	readyChan := make(chan string, 1)
+	var code string
 	var out *oidc.TokenSet
 	var eg errgroup.Group
 	eg.Go(func() error {
@@ -80,19 +81,27 @@ func (u *Browser) Do(ctx context.Context, o *BrowserOption, oidcClient client.In
 	})
 	eg.Go(func() error {
 		defer close(readyChan)
-		tokenSet, err := oidcClient.GetTokenByAuthCode(ctx, in, readyChan)
-		if err != nil {
-			return fmt.Errorf("authorization code flow error: %w", err)
+		if authcodeOnly {
+			code, err = oidcClient.GetAuthCode(ctx, in, readyChan)
+			if err != nil {
+				return fmt.Errorf("authorization code flow error: %w", err)
+			}
+		} else {
+			tokenSet, err := oidcClient.GetTokenByAuthCode(ctx, in, readyChan)
+			if err != nil {
+				return fmt.Errorf("authorization code flow error: %w", err)
+			}
+			out = tokenSet
 		}
-		out = tokenSet
+
 		u.Logger.V(1).Infof("got a token set by the authorization code flow")
 		return nil
 	})
 	if err := eg.Wait(); err != nil {
-		return nil, fmt.Errorf("authentication error: %w", err)
+		return nil, "", fmt.Errorf("authentication error: %w", err)
 	}
 	u.Logger.V(1).Infof("finished the authorization code flow via the browser")
-	return out, nil
+	return out, code, nil
 }
 
 func (u *Browser) openURL(ctx context.Context, o *BrowserOption, url string) {

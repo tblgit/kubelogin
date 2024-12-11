@@ -25,7 +25,7 @@ var Set = wire.NewSet(
 )
 
 type Interface interface {
-	Do(ctx context.Context, in Input) (*Output, error)
+	Do(ctx context.Context, in Input) (*Output, string, error)
 }
 
 // Input represents an input DTO of the Authentication use-case.
@@ -71,49 +71,49 @@ type Authentication struct {
 	DeviceCode       *devicecode.DeviceCode
 }
 
-func (u *Authentication) Do(ctx context.Context, in Input) (*Output, error) {
+func (u *Authentication) Do(ctx context.Context, in Input) (*Output, string, error) {
 	u.Logger.V(1).Infof("initializing an OpenID Connect client")
 	oidcClient, err := u.ClientFactory.New(ctx, in.Provider, in.TLSClientConfig)
 	if err != nil {
-		return nil, fmt.Errorf("oidc error: %w", err)
+		return nil, "", fmt.Errorf("oidc error: %w", err)
 	}
 
 	if in.CachedTokenSet != nil && in.CachedTokenSet.RefreshToken != "" {
 		u.Logger.V(1).Infof("refreshing the token")
 		tokenSet, err := oidcClient.Refresh(ctx, in.CachedTokenSet.RefreshToken)
 		if err == nil {
-			return &Output{TokenSet: *tokenSet}, nil
+			return &Output{TokenSet: *tokenSet}, "", nil
 		}
 		u.Logger.V(1).Infof("could not refresh the token: %s", err)
 	}
 
 	if in.GrantOptionSet.AuthCodeBrowserOption != nil {
-		tokenSet, err := u.AuthCodeBrowser.Do(ctx, in.GrantOptionSet.AuthCodeBrowserOption, oidcClient)
+		tokenSet, code, err := u.AuthCodeBrowser.Do(ctx, in.GrantOptionSet.AuthCodeBrowserOption, oidcClient, true)
 		if err != nil {
-			return nil, fmt.Errorf("authcode-browser error: %w", err)
+			return nil, "", fmt.Errorf("authcode-browser error: %w", err)
 		}
-		return &Output{TokenSet: *tokenSet}, nil
+		return &Output{TokenSet: *tokenSet}, code, nil
 	}
 	if in.GrantOptionSet.AuthCodeKeyboardOption != nil {
 		tokenSet, err := u.AuthCodeKeyboard.Do(ctx, in.GrantOptionSet.AuthCodeKeyboardOption, oidcClient)
 		if err != nil {
-			return nil, fmt.Errorf("authcode-keyboard error: %w", err)
+			return nil, "", fmt.Errorf("authcode-keyboard error: %w", err)
 		}
-		return &Output{TokenSet: *tokenSet}, nil
+		return &Output{TokenSet: *tokenSet}, "", nil
 	}
 	if in.GrantOptionSet.ROPCOption != nil {
 		tokenSet, err := u.ROPC.Do(ctx, in.GrantOptionSet.ROPCOption, oidcClient)
 		if err != nil {
-			return nil, fmt.Errorf("ropc error: %w", err)
+			return nil, "", fmt.Errorf("ropc error: %w", err)
 		}
-		return &Output{TokenSet: *tokenSet}, nil
+		return &Output{TokenSet: *tokenSet}, "", nil
 	}
 	if in.GrantOptionSet.DeviceCodeOption != nil {
 		tokenSet, err := u.DeviceCode.Do(ctx, in.GrantOptionSet.DeviceCodeOption, oidcClient)
 		if err != nil {
-			return nil, fmt.Errorf("device-code error: %w", err)
+			return nil, "", fmt.Errorf("device-code error: %w", err)
 		}
-		return &Output{TokenSet: *tokenSet}, nil
+		return &Output{TokenSet: *tokenSet}, "", nil
 	}
-	return nil, fmt.Errorf("any authorization grant must be set")
+	return nil, "", fmt.Errorf("any authorization grant must be set")
 }

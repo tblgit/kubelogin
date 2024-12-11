@@ -105,7 +105,7 @@ func (u *Standalone) Do(ctx context.Context, in Input) error {
 		CachedTokenSet:  cachedTokenSet,
 		TLSClientConfig: in.TLSClientConfig,
 	}
-	authenticationOutput, err := u.Authentication.Do(ctx, authenticationInput)
+	authenticationOutput, _, err := u.Authentication.Do(ctx, authenticationInput)
 	if err != nil {
 		return fmt.Errorf("authentication error: %w", err)
 	}
