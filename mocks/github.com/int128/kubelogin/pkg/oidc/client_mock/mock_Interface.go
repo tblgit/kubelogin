@@ -249,6 +249,9 @@ func (_c *MockInterface_GetDeviceAuthorization_Call) RunAndReturn(run func(conte
 	return _c
 }
 
+func (_m *MockInterface) GetAuthCode(ctx context.Context, in client.GetTokenByAuthCodeInput, localServerReadyChan chan<- string) (string, error) {
+	return "", nil
+}
 // GetTokenByAuthCode provides a mock function with given fields: ctx, in, localServerReadyChan
 func (_m *MockInterface) GetTokenByAuthCode(ctx context.Context, in client.GetTokenByAuthCodeInput, localServerReadyChan chan<- string) (*oidc.TokenSet, error) {
 	ret := _m.Called(ctx, in, localServerReadyChan)

@@ -12,12 +12,14 @@ import (
 	"github.com/int128/kubelogin/pkg/oidc"
 	"github.com/int128/kubelogin/pkg/pkce"
 	"github.com/int128/oauth2cli"
+	"github.com/int128/oauth2cli/oauth2params"
 	"github.com/int128/oauth2dev"
 	"golang.org/x/oauth2"
 )
 
 type Interface interface {
 	GetAuthCodeURL(in AuthCodeURLInput) string
+	GetAuthCode(ctx context.Context, in GetTokenByAuthCodeInput, localServerReadyChan chan<- string) (string, error)
 	ExchangeAuthCode(ctx context.Context, in ExchangeAuthCodeInput) (*oidc.TokenSet, error)
 	GetTokenByAuthCode(ctx context.Context, in GetTokenByAuthCodeInput, localServerReadyChan chan<- string) (*oidc.TokenSet, error)
 	GetTokenByROPC(ctx context.Context, username, password string) (*oidc.TokenSet, error)
@@ -26,6 +28,8 @@ type Interface interface {
 	Refresh(ctx context.Context, refreshToken string) (*oidc.TokenSet, error)
 	SupportedPKCEMethods() []string
 }
+
+var noopMiddleware = func(h http.Handler) http.Handler { return h }
 
 type AuthCodeURLInput struct {
 	State                  string
@@ -93,6 +97,57 @@ func (c *client) GetTokenByAuthCode(ctx context.Context, in GetTokenByAuthCodeIn
 		return nil, fmt.Errorf("oauth2 error: %w", err)
 	}
 	return c.verifyToken(ctx, token, in.Nonce)
+}
+
+// GetAuthCode retrieves the auth code.
+func (c *client) GetAuthCode(ctx context.Context, in GetTokenByAuthCodeInput, localServerReadyChan chan<- string) (string, error) {
+	ctx = c.wrapContext(ctx)
+	config := oauth2cli.Config{
+		OAuth2Config:           c.oauth2Config,
+		State:                  in.State,
+		AuthCodeOptions:        authorizationRequestOptions(in.Nonce, in.PKCEParams, in.AuthRequestExtraParams),
+		TokenRequestOptions:    tokenRequestOptions(in.PKCEParams),
+		LocalServerBindAddress: in.BindAddress,
+		LocalServerReadyChan:   localServerReadyChan,
+		RedirectURLHostname:    in.RedirectURLHostname,
+		LocalServerSuccessHTML: in.LocalServerSuccessHTML,
+		LocalServerCertFile:    in.LocalServerCertFile,
+		LocalServerKeyFile:     in.LocalServerKeyFile,
+		Logf:                   c.logger.V(1).Infof,
+	}
+
+	if (config.LocalServerCertFile != "" && config.LocalServerKeyFile == "") ||
+		(config.LocalServerCertFile == "" && config.LocalServerKeyFile != "") {
+		return "", fmt.Errorf("both LocalServerCertFile and LocalServerKeyFile must be set")
+	}
+	if config.RedirectURLHostname == "" {
+		config.RedirectURLHostname = "localhost"
+	}
+	if config.State == "" {
+		s, err := oauth2params.NewState()
+		if err != nil {
+			return "", fmt.Errorf("could not generate a state parameter: %w", err)
+		}
+		config.State = s
+	}
+	if config.LocalServerMiddleware == nil {
+		config.LocalServerMiddleware = noopMiddleware
+	}
+	if config.LocalServerSuccessHTML == "" {
+		config.LocalServerSuccessHTML = oauth2cli.DefaultLocalServerSuccessHTML
+	}
+	if (config.SuccessRedirectURL != "" && config.FailureRedirectURL == "") ||
+		(config.SuccessRedirectURL == "" && config.FailureRedirectURL != "") {
+		return "", fmt.Errorf("when using success and failure redirect URLs, set both URLs")
+	}
+	if config.Logf == nil {
+		config.Logf = func(string, ...interface{}) {}
+	}
+	code, err := GetAuthCode(ctx, config)
+	if err != nil {
+		return "", fmt.Errorf("oauth2 error: %w", err)
+	}
+	return code, nil
 }
 
 // GetAuthCodeURL returns the URL of authentication request for the authorization code flow.
