@@ -88,11 +88,11 @@ func (u *Authentication) Do(ctx context.Context, in Input) (*Output, string, err
 	}
 
 	if in.GrantOptionSet.AuthCodeBrowserOption != nil {
-		tokenSet, code, err := u.AuthCodeBrowser.Do(ctx, in.GrantOptionSet.AuthCodeBrowserOption, oidcClient, true)
+		_, code, err := u.AuthCodeBrowser.Do(ctx, in.GrantOptionSet.AuthCodeBrowserOption, oidcClient, true)
 		if err != nil {
 			return nil, "", fmt.Errorf("authcode-browser error: %w", err)
 		}
-		return &Output{TokenSet: *tokenSet}, code, nil
+		return &Output{TokenSet: oidc.TokenSet{}}, code, nil
 	}
 	if in.GrantOptionSet.AuthCodeKeyboardOption != nil {
 		tokenSet, err := u.AuthCodeKeyboard.Do(ctx, in.GrantOptionSet.AuthCodeKeyboardOption, oidcClient)

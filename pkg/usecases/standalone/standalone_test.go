@@ -82,7 +82,7 @@ func TestStandalone_Do(t *testing.T) {
 					IDToken:      issuedIDToken,
 					RefreshToken: "YOUR_REFRESH_TOKEN",
 				},
-			}, nil)
+			}, "", nil)
 		u := Standalone{
 			Authentication:   mockAuthentication,
 			KubeconfigLoader: mockLoader,
@@ -163,7 +163,7 @@ func TestStandalone_Do(t *testing.T) {
 					ClientSecret: "YOUR_CLIENT_SECRET",
 				},
 			}).
-			Return(nil, errors.New("authentication error"))
+			Return(nil, "", errors.New("authentication error"))
 		u := Standalone{
 			Authentication:   mockAuthentication,
 			KubeconfigLoader: mockLoader,
@@ -215,7 +215,7 @@ func TestStandalone_Do(t *testing.T) {
 					IDToken:      issuedIDToken,
 					RefreshToken: "YOUR_REFRESH_TOKEN",
 				},
-			}, nil)
+			}, "", nil)
 		u := Standalone{
 			Authentication:   mockAuthentication,
 			KubeconfigLoader: mockLoader,

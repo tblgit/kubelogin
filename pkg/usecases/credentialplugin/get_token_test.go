@@ -74,7 +74,7 @@ func TestGetToken_Do(t *testing.T) {
 				Provider:       dummyProvider,
 				GrantOptionSet: grantOptionSet,
 			}).
-			Return(&authentication.Output{TokenSet: issuedTokenSet}, nil)
+			Return(&authentication.Output{TokenSet: issuedTokenSet}, "", nil)
 		mockCloser := io_mock.NewMockCloser(t)
 		mockCloser.EXPECT().
 			Close().
@@ -135,7 +135,7 @@ func TestGetToken_Do(t *testing.T) {
 				Provider:       dummyProvider,
 				GrantOptionSet: grantOptionSet,
 			}).
-			Return(&authentication.Output{TokenSet: issuedTokenSet}, nil)
+			Return(&authentication.Output{TokenSet: issuedTokenSet}, "", nil)
 		mockCloser := io_mock.NewMockCloser(t)
 		mockCloser.EXPECT().
 			Close().
@@ -244,7 +244,7 @@ func TestGetToken_Do(t *testing.T) {
 				Provider:       dummyProvider,
 				GrantOptionSet: grantOptionSet,
 			}).
-			Return(nil, errors.New("authentication error"))
+			Return(nil, "", errors.New("authentication error"))
 		mockCloser := io_mock.NewMockCloser(t)
 		mockCloser.EXPECT().
 			Close().

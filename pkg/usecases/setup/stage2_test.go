@@ -54,7 +54,7 @@ func TestSetup_DoStage2(t *testing.T) {
 				IDToken:      issuedIDToken,
 				RefreshToken: "YOUR_REFRESH_TOKEN",
 			},
-		}, nil)
+		}, "", nil)
 	u := Setup{
 		Authentication: mockAuthentication,
 		Logger:         logger.New(t),
